@@ -1,14 +1,18 @@
-# Three-service stack: MongoDB -> Spring Boot backend -> Angular frontend (nginx)
+# Three-service stack: PostgreSQL -> Spring Boot backend -> Angular frontend (nginx)
 # Start everything: docker-compose up --build
 # depends_on controls startup order, but doesn't wait for services to be "ready"
 
 services:
-  # MongoDB: stores the car specs collection
+  # PostgreSQL: stores the car specs table
   db:
-    image: mongo:latest
-    container_name: db-mongo-initial
+    image: postgres:16-alpine
+    container_name: db-postgres-initial
     ports:
-      - "27017:27017"
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: vroom
+      POSTGRES_USER: vroom
+      POSTGRES_PASSWORD: vroom
 
   # Spring Boot: REST API + WebSocket simulation engine
   backend:
@@ -19,7 +23,9 @@ services:
     environment:
       # Activates application-docker.properties
       SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATA_MONGODB_URI: mongodb://db:27017/vroom
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/vroom
+      SPRING_DATASOURCE_USERNAME: vroom
+      SPRING_DATASOURCE_PASSWORD: vroom
     depends_on:
       - db
 
