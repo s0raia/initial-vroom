@@ -42,7 +42,7 @@ Each run is a **head-to-head mountain pass battle**: you pick two cars from the 
 
 This started as a junior-portfolio hunt that turned into a deep dive on **automotive dashboards**—clusters, ECU-style readouts, and live telemetry UX I barely understood at first. I wired that curiosity to **Initial D** (skill and setup over raw horsepower) and **Le Mans** (hours of radio and timing drama), and kept scope small enough to ship while still forcing **honest streaming**, **REST + WebSocket**, and data that had to survive a real schema.
 
-**Angular** and **PostgreSQL** were deliberate bets: standalone components + RxJS on one side, CSV specs loaded with **OpenCSV** on the other—same “build it like it’s real” instinct as my other projects, just on asphalt instead of a merch table.
+**Angular** was a deliberate bet (standalone components + RxJS). I started on Mongo to learn it and load the CSV roster quickly; moved to Postgres once the schema settled and so the database could live on Render next to the app.
 
 ### 📊 Data realism & sourcing
 
