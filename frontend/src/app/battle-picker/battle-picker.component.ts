@@ -83,7 +83,7 @@ export class BattlePickerComponent implements OnInit {
     }
   }
 
-  // Using carModelId for comparison since it's the unique key (same as Mongo _id)
+  // Using carModelId for comparison since it's the unique key
   isSelected(car: Car): boolean {
     return (
       this.car1?.carModelId === car.carModelId ||

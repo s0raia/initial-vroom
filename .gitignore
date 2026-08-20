@@ -74,4 +74,4 @@ other_docs/
 
 # Data Simulation / Logs
 **/logs/
-**/data/db/        # Common for local MongoDB volumes
+**/data/db/        # Common for local database volumes

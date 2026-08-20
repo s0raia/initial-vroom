@@ -2,7 +2,7 @@
 
 *"In active development; expect rough edges."*
 
-A full-stack telemetry playground that simulates head-to-head mountain pass battles and streams the results to a live dashboard. It borrows the mood of *Initial D*'s mountain passes and the always-on data obsession of endurance racing (think Le Mans radios), implemented with **Java Spring Boot**, **Angular**, and **MongoDB**. REST handles roster and battle commands; **STOMP over WebSocket** pushes ~20 Hz telemetry so the UI behaves like a real cluster reading the wire—not inventing physics in the browser.
+A full-stack telemetry playground that simulates head-to-head mountain pass battles and streams the results to a live dashboard. It borrows the mood of *Initial D*'s mountain passes and the always-on data obsession of endurance racing (think Le Mans radios), implemented with **Java Spring Boot**, **Angular**, and **PostgreSQL**. REST handles roster and battle commands; **STOMP over WebSocket** pushes ~20 Hz telemetry so the UI behaves like a real cluster reading the wire—not inventing physics in the browser.
 
 **🔗 [Live demo (Render)*](https://initial-vroom-frontend.onrender.com)*
 
@@ -42,11 +42,11 @@ Each run is a **head-to-head mountain pass battle**: you pick two cars from the 
 
 This started as a junior-portfolio hunt that turned into a deep dive on **automotive dashboards**—clusters, ECU-style readouts, and live telemetry UX I barely understood at first. I wired that curiosity to **Initial D** (skill and setup over raw horsepower) and **Le Mans** (hours of radio and timing drama), and kept scope small enough to ship while still forcing **honest streaming**, **REST + WebSocket**, and data that had to survive a real schema.
 
-**Angular** and **MongoDB** were deliberate bets: standalone components + RxJS on one side, document-shaped specs loaded with **OpenCSV** on the other—same “build it like it’s real” instinct as my other projects, just on asphalt instead of a merch table.
+**Angular** and **PostgreSQL** were deliberate bets: standalone components + RxJS on one side, CSV specs loaded with **OpenCSV** on the other—same “build it like it’s real” instinct as my other projects, just on asphalt instead of a merch table.
 
 ### 📊 Data realism & sourcing
 
-I built the roster off **real cars**—the actual JDM machinery behind each *Initial D* matchup—using factory specs and chassis research, then nudged figures where the series clearly moves into swaps, turbos, or weight-saving mods. Those rows live in `**stage1_battle cars.csv*`* and `**stage2_battle cars.csv**` and load into MongoDB as `**Car**` documents (`backend/src/main/java/com/initialvroom/entity/Car.java`) via OpenCSV.
+I built the roster off **real cars**—the actual JDM machinery behind each *Initial D* matchup—using factory specs and chassis research, then nudged figures where the series clearly moves into swaps, turbos, or weight-saving mods. Those rows live in `**stage1_battle cars.csv*`* and `**stage2_battle cars.csv**` and load into PostgreSQL as `**Car**` rows (`backend/src/main/java/com/initialvroom/entity/Car.java`) via OpenCSV.
 
 ### 🎨 Design & accessibility
 
@@ -58,14 +58,14 @@ I built the roster off **real cars**—the actual JDM machinery behind each *Ini
 
 ## Architecture & Tech Stack
 
-**Compose:** MongoDB, Spring Boot, and an nginx-built Angular bundle—the SPA talks to **REST** and `**/vroom-ws`**/`**/topic/race**` directly; nginx only serves static assets.
+**Compose:** PostgreSQL, Spring Boot, and an nginx-built Angular bundle—the SPA talks to **REST** and `**/vroom-ws`**/`**/topic/race**` directly; nginx only serves static assets.
 
-**Sim:** `**RaceSimulationService`** runs on the server (**50 ms** ticks → ~20 Hz), publishes `**BattleTelemetryDTO`** to `**/topic/race**`; REST starts/stops battles and loads cars from `**DataInitializer**` when MongoDB’s `cars` collection is empty.
+**Sim:** `**RaceSimulationService`** runs on the server (**50 ms** ticks → ~20 Hz), publishes `**BattleTelemetryDTO`** to `**/topic/race**`; REST starts/stops battles and loads cars from `**DataInitializer**` when the Postgres `cars` table is empty.
 
 
 | Layer        | Stack                                            |
 | ------------ | ------------------------------------------------ |
-| **Backend**  | Java 21, Spring Boot 3.2.0, MongoDB, OpenCSV 5.9 |
+| **Backend**  | Java 21, Spring Boot 3.2.0, PostgreSQL, OpenCSV 5.9 |
 | **Frontend** | Angular 18.2 (standalone), RxJS, STOMP/SockJS    |
 | **Ops**      | Docker Compose                                   |
 
@@ -81,7 +81,7 @@ No Figma phase—UI decisions hardened while coding.
 
 | Status | Feature                                                        |
 | ------ | -------------------------------------------------------------- |
-| ✅      | Battle Picker with stage-grouped roster from MongoDB           |
+| ✅      | Battle Picker with stage-grouped roster from PostgreSQL        |
 | ✅      | Live dual telemetry dashboard (speed, RPM, gear, gap, elapsed) |
 | ✅      | SVG mountain pass with sprites driven off progress             |
 | ✅      | Post-race results (winner, stats, time, gap)                   |
@@ -119,16 +119,16 @@ If your install still wires the hyphenated binary, use `docker-compose up --buil
 | ----------------------- | ---------------------------------------------------------------------- |
 | Angular app (nginx)     | [http://localhost:4200](http://localhost:4200)                         |
 | Backend API / WebSocket | [http://localhost:8081](http://localhost:8081) (`/vroom-ws` for STOMP) |
-| MongoDB                 | localhost:27017                                                        |
+| PostgreSQL              | localhost:5432                                                         |
 
 
 First build can take a few minutes. Stop with `docker compose down` (or `docker-compose down`).
 
-On **first backend startup** with an **empty `cars` collection**, `DataInitializer` loads `**stage1_battle cars.csv`** and `**stage2_battle cars.csv**` from `backend/src/main/resources/data/`; if MongoDB already has cars, restarts **skip** re-seeding.
+On **first backend startup** with an **empty `cars` table**, `DataInitializer` loads `**stage1_battle cars.csv`** and `**stage2_battle cars.csv**` from `backend/src/main/resources/data/`; if Postgres already has cars, restarts **skip** re-seeding.
 
 ### Option B: Manual (for development)
 
-Requires **Java 21**, **Maven**, **Node.js 20+**, and **MongoDB** on `localhost:27017`.
+Requires **Java 21**, **Maven**, **Node.js 20+**, and **PostgreSQL** on `localhost:5432`.
 
 **1. Database** — ensure a `vroom` database is reachable per `backend/src/main/resources/application-local.properties`.
 
@@ -154,7 +154,7 @@ npm start
 | Backend            | [http://localhost:8081](http://localhost:8081) |
 
 
-Same `**DataInitializer**` behavior as Docker: CSV seed runs **once** when `cars` is empty; later runs keep whatever is already in MongoDB.
+Same `**DataInitializer**` behavior as Docker: CSV seed runs **once** when `cars` is empty; later runs keep whatever is already in PostgreSQL.
 
 ---
 
