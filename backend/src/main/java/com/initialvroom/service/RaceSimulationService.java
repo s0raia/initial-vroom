@@ -46,7 +46,7 @@ public class RaceSimulationService {
 
     /**
      * Called by BattleController when the user clicks "Start Battle".
-     * Looks up both cars in MongoDB and resets all race state.
+     * Looks up both cars in the database and resets all race state.
      * Synchronized to prevent two battles starting at the same time.
      */
     public synchronized boolean startBattle(String car1Id, String car2Id) {

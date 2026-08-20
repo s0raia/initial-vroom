@@ -3,18 +3,22 @@ package com.initialvroom.entity;
 import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvCustomBindByName;
 import com.initialvroom.config.BooleanConverter;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 /**
- * Mongo document + OpenCSV row shape for {@code cars}; {@code carModelId} doubles as {@code _id}.
+ * Postgres row + OpenCSV shape for {@code cars}; {@code carModelId} is the primary key.
  * Fields expanded iteratively as the sim needed aspiration/drivetrain bonuses beyond bare HP.
  */
-@Document(collection = "cars")
+@Entity
+@Table(name = "cars")
 public class Car {
 
-    // Using car_model_id as the Mongo _id — natural key so we can query by meaningful IDs
+    // Natural key so we can query by meaningful IDs instead of a generated number
     @Id
+    @Column(name = "car_model_id")
     @CsvBindByName(column = "car_model_id")
     private String carModelId;
 
@@ -66,7 +70,7 @@ public class Car {
     @CsvBindByName(column = "specs_note")
     private String specsNote;
 
-    // No-arg constructor required by both OpenCSV and Spring Data MongoDB
+    // No-arg constructor required by both OpenCSV and JPA
     public Car() {
     }
 

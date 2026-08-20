@@ -34,11 +34,11 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
         if (carRepository.count() > 0) {
-            log.info("Cars collection already populated, skipping data initialization.");
+            log.info("Cars table already populated, skipping data initialization.");
             return;
         }
 
-        log.info("Cars collection is empty, loading data from CSV files...");
+        log.info("Cars table is empty, loading data from CSV files...");
 
         List<Car> allCars = new java.util.ArrayList<>();
 
@@ -46,7 +46,7 @@ public class DataInitializer implements CommandLineRunner {
         loadCsv(allCars, STAGE2_CSV);
 
         carRepository.saveAll(allCars);
-        log.info("Loaded {} cars into MongoDB.", allCars.size());
+        log.info("Loaded {} cars into PostgreSQL.", allCars.size());
     }
 
     private void loadCsv(List<Car> allCars, String resourceName) {

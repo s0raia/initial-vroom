@@ -18,7 +18,7 @@ public class BattleController {
     }
 
     // POST /api/battles — body must contain { car1Id, car2Id }
-    // Returns 400 if either car ID doesn't exist in MongoDB
+    // Returns 400 if either car ID doesn't exist in the cars table
     @PostMapping
     public ResponseEntity<String> startBattle(@RequestBody BattleRequest request) {
         boolean started = raceSimulationService.startBattle(request.getCar1Id(), request.getCar2Id());
